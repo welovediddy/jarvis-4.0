@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="JARVIS personal assistant — tasks, memory, world search, weather and environment.">
+  <title>JARVIS Personal Assistant</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand"><span class="orb"></span><div><b>JARVIS</b><small>Personal Assistant</small></div></div>
+      <button class="nav active" data-tab="home">⌂ Dashboard</button>
+      <button class="nav" data-tab="search">⌕ World Search</button>
+      <button class="nav" data-tab="tasks">✓ Daily Tasks</button>
+      <button class="nav" data-tab="memory">◈ Memory</button>
+      <button class="nav" data-tab="environment">☁ Environment</button>
+      <button class="nav" data-tab="friends">◎ Shared Locations</button>
+      <button class="nav" data-tab="rooms">⌂ Private Room</button>
+      <button class="nav" data-tab="settings">⚙ Settings</button>
+      <div class="side-note">Your saved data stays in this browser unless you connect an external service.</div>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <div>
+          <div class="eyebrow" id="today"></div>
+          <h1 id="greeting">Hello.</h1>
+        </div>
+        <button id="speakBtn" class="icon-btn" title="Speak the greeting">🔊</button>
+      </header>
+
+      <section id="home" class="tab active">
+        <div class="hero card">
+          <div><span class="pill">ONLINE</span><h2>How can I help?</h2><p>Ask a question, search anywhere in the world, manage your day, or check your environment.</p></div>
+          <div class="orb-big"></div>
+        </div>
+        <div class="grid four">
+          <div class="card stat"><span>Tasks</span><b id="taskCount">0</b><small>open today</small></div>
+          <div class="card stat"><span>Memories</span><b id="memoryCount">0</b><small>saved locally</small></div>
+          <div class="card stat"><span>Location</span><b id="locationStatus">Off</b><small>browser permission</small></div>
+          <div class="card stat"><span>Environment</span><b id="envStatus">Ready</b><small>weather + air quality</small></div>
+        </div>
+        <div class="grid two">
+          <div class="card">
+            <h3>Ask JARVIS</h3>
+            <div class="chat" id="chat"></div>
+            <div class="input-row"><input id="askInput" placeholder="Ask anything..."><button id="askBtn">Ask</button><button id="micBtn" title="Voice input">🎙</button></div>
+            <small class="muted">Ask a question and JARVIS will try its connected AI first, then web knowledge, then its built-in assistant. No API key is required for the web-knowledge fallback.</small>
+          </div>
+          <div class="card">
+            <h3>Today's plan</h3>
+            <div id="todayTasks" class="list"></div>
+            <button class="secondary" data-go="tasks">Manage tasks →</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="search" class="tab">
+        <div class="card">
+          <h2>World Search</h2><p>Search cities, states, countries, landmarks, addresses and more.</p>
+          <div class="input-row"><input id="worldInput" placeholder="Try: Tokyo, Paris, Texas, Eiffel Tower..."><button id="worldBtn">Search</button></div>
+          <div id="worldResults" class="results"></div>
+        </div>
+        <div class="card">
+          <h3>Nearby me</h3>
+          <div class="chips">
+            <button data-near="restaurant">Restaurants</button><button data-near="park">Parks</button><button data-near="hospital">Hospitals</button><button data-near="store">Stores</button><button data-near="tourism">Attractions</button>
+          </div>
+          <p class="muted">Nearby search uses your browser location and opens a map search.</p>
+        </div>
+      </section>
+
+      <section id="tasks" class="tab">
+        <div class="card">
+          <h2>Daily Tasks</h2>
+          <div class="input-row"><input id="taskInput" placeholder="Add a task..."><input id="taskTime" type="time"><button id="addTask">Add</button></div>
+          <div id="taskList" class="list"></div>
+        </div>
+      </section>
+
+      <section id="memory" class="tab">
+        <div class="card">
+          <h2>Memory</h2><p>JARVIS only saves information when you choose to save it.</p>
+          <div class="input-row"><input id="memoryInput" placeholder="Example: Remember that my project is called JARVIS"><button id="saveMemory">Remember</button></div>
+          <div class="input-row"><input id="memorySearch" placeholder="Filter saved memories..."></div>
+          <div id="memoryList" class="list"></div>
+        </div>
+      </section>
+
+      <section id="environment" class="tab">
+        <div class="card">
+          <h2>Environment Monitor</h2>
+          <p>Get weather, forecast, UV, wind, humidity and air-quality readings for your current location or a searched location.</p>
+          <div class="input-row"><input id="envInput" placeholder="City or country (leave blank for my location)"><button id="envBtn">Check</button></div>
+          <div id="envCards" class="grid four"></div>
+          <div id="forecast" class="forecast"></div>
+          <small class="muted">Data provided by Open-Meteo. Values are model/forecast data and may differ from local instruments.</small>
+        </div>
+
+        <div class="card">
+          <h2>Visual Environment Analysis</h2>
+          <p>Use your camera to let JARVIS inspect what is around you. The camera stays in your browser unless you choose to send a captured image to your configured AI endpoint.</p>
+          <div class="camera-wrap">
+            <video id="camera" autoplay playsinline muted></video>
+            <canvas id="cameraCanvas" class="hidden"></canvas>
+          </div>
+          <div class="input-row camera-controls">
+            <button id="startCamera">Start camera</button>
+            <button id="captureCamera" class="secondary">Capture & analyze</button>
+            <button id="stopCamera" class="secondary">Stop camera</button>
+          </div>
+          <div id="visionResult" class="analysis-box">Camera analysis is off.</div>
+          <small class="muted">Visual analysis requires a vision-capable AI endpoint in Settings. Without one, JARVIS can still monitor weather and air quality.</small>
+        </div>
+      </section>
+
+      <section id="friends" class="tab">
+        <div class="card">
+          <h2>Shared Locations</h2>
+          <p>For privacy, this demo only stores locations you intentionally add. It does not secretly track anyone.</p>
+          <div class="grid two">
+            <div><input id="friendName" placeholder="Friend name"><input id="friendLat" placeholder="Latitude"><input id="friendLon" placeholder="Longitude"><button id="addFriend">Add shared location</button></div>
+            <div id="friendList" class="list"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="rooms" class="tab">
+        <div class="card">
+          <h2>Private Location Room</h2>
+          <p>Create a room code and give it only to friends who you want in the room. Everyone must choose to share their own location.</p>
+          <div class="grid two">
+            <div>
+              <label>Your name<input id="roomName" placeholder="Your name"></label>
+              <div class="input-row"><input id="roomCode" placeholder="Room code"><button id="createRoom">Create</button><button id="joinRoom" class="secondary">Join</button></div>
+              <div class="input-row"><button id="copyRoom" class="secondary">Copy code</button><button id="leaveRoom" class="secondary">Leave room</button></div>
+              <label class="check-label"><input id="shareLocation" type="checkbox"> Share my live location with this room</label>
+              <div id="roomStatus" class="analysis-box">No room connected.</div>
+            </div>
+            <div>
+              <h3>People in this room</h3>
+              <div id="roomPeople" class="list"></div>
+            </div>
+          </div>
+          <small class="muted">Location sharing is opt-in. The room code is a private access code, not a guarantee of end-to-end encryption. Cross-device rooms require the optional WebSocket room server included with this project.</small>
+        </div>
+      </section>
+
+      <section id="settings" class="tab">
+        <div class="card">
+          <h2>Settings</h2>
+          <label>Accent color <input id="accent" type="color" value="#00d9ff"></label>
+          <label>AI endpoint <input id="aiEndpoint" placeholder="https://your-server.example/api/ask"></label>
+          <label>Private room server <input id="roomWsUrl" placeholder="wss://your-server.example/rooms"></label>
+          <label>Voice style
+            <select id="voiceStyle">
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
+          </label>
+          <label>Voice
+            <select id="voiceName"><option value="">System default</option></select>
+          </label>
+          <label class="check-label"><input id="speakAnswers" type="checkbox"> Speak JARVIS answers automatically</label>
+          <label>Voice rate <input id="voiceRate" type="range" min=".7" max="1.4" step=".1" value="1"></label>
+          <button id="saveSettings">Save settings</button>
+          <button id="clearData" class="danger">Clear local JARVIS data</button>
+          <p class="muted">GitHub Pages can host the static app. A server endpoint is needed for private AI API keys and advanced cloud features.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
